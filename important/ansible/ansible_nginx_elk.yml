@@ -1,0 +1,29 @@
+---
+ - name: create_user
+   hosts: all
+   user: root
+   gather_facts: true
+   vars: 
+    - user: "nginx"
+    - nginx_dir: "/usr/local/nginx"
+    - tar_dir: "/root/nginx-1.12.2"
+    - conf_file: "/usr/local/nginx/conf/nginx.conf"
+    - index_file: "/usr/local/nginx/html"
+    - agent_ip: "172.16.119.111"
+    - web1_ip: "172.16.119.119"
+    - web2_ip: "172.16.119.120"
+   tasks: 
+    - name: create user
+      user: name={{ user }} 
+    - name: create group
+      group: name={{ user }} 
+    - yum: name="pcre-devel"
+    - yum: name="gcc*"
+    - yum: name="openssl-devel"
+    - name: unarchive_tar
+      unarchive: src=/1801/note/0912nginx/nginx-1.12.2.tar.gz dest=/root/
+    - name: configure_make_make install 
+      command: ./configure --prefix={{ nginx_dir }} --user={{ user }} --group={{ user }} --with-http_stub_status_module --with-http_ssl_module --sbin-path=/usr/sbin chdir={{ tar_dir }}
+    - command: make  chdir={{ tar_dir }} 
+    - command: make install  chdir={{ tar_dir }} 
+    - command: sed -i '2c user nginx;' {{ conf_file }} 
